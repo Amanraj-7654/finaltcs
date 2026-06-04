@@ -15,8 +15,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +91,8 @@ public class CodeExecutionService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400) {
-                throw new RuntimeException("JDoodle returned error code: " + response.statusCode() + " body: " + response.body());
+                throw new RuntimeException(
+                        "JDoodle returned error code: " + response.statusCode() + " body: " + response.body());
             }
 
             return decodeJDoodleResponse(response.body(), jdLang.language);
@@ -113,13 +113,15 @@ public class CodeExecutionService {
             }
 
             String output = raw.path("output").asText("");
-            
+
             // Check for compilation error indicators
             boolean isCompileError = false;
             if (output != null) {
-                if ("java".equals(language) && (output.contains("error:") || output.contains("compiler error") || output.contains("Compilation problem"))) {
+                if ("java".equals(language) && (output.contains("error:") || output.contains("compiler error")
+                        || output.contains("Compilation problem"))) {
                     isCompileError = true;
-                } else if (("cpp".equals(language) || "c".equals(language)) && (output.contains("error:") || output.contains("In function"))) {
+                } else if (("cpp".equals(language) || "c".equals(language))
+                        && (output.contains("error:") || output.contains("In function"))) {
                     isCompileError = true;
                 }
             }
@@ -136,9 +138,11 @@ public class CodeExecutionService {
                 // Check for common runtime errors
                 boolean isRuntimeError = false;
                 if (output != null) {
-                    if (output.contains("Exception in thread") || output.contains("NullPointerException") || 
-                        output.contains("ArrayIndexOutOfBoundsException") || output.contains("Traceback (most recent call last):") ||
-                        output.contains("RuntimeError") || output.contains("ReferenceError") || output.contains("TypeError")) {
+                    if (output.contains("Exception in thread") || output.contains("NullPointerException") ||
+                            output.contains("ArrayIndexOutOfBoundsException")
+                            || output.contains("Traceback (most recent call last):") ||
+                            output.contains("RuntimeError") || output.contains("ReferenceError")
+                            || output.contains("TypeError")) {
                         isRuntimeError = true;
                     }
                 }
@@ -165,7 +169,7 @@ public class CodeExecutionService {
             // Map time and memory
             String cpuTime = raw.path("cpuTime").asText("0.00");
             decoded.put("time", cpuTime);
-            
+
             String memStr = raw.path("memory").asText("0");
             try {
                 if (memStr != null && !memStr.isEmpty()) {
@@ -200,7 +204,8 @@ public class CodeExecutionService {
                     String driverCodeJson = question.getDriverCode();
                     if (driverCodeJson != null && !driverCodeJson.trim().isEmpty()) {
                         JsonNode drivers = objectMapper.readTree(driverCodeJson);
-                        // Map languageId to JDoodle language string: "java", "cpp", "c", "python3", "nodejs"
+                        // Map languageId to JDoodle language string: "java", "cpp", "c", "python3",
+                        // "nodejs"
                         String jdLangStr = mapLanguageToJDoodle(languageId).language;
                         if (drivers.has(jdLangStr)) {
                             String template = drivers.path(jdLangStr).asText();
@@ -217,7 +222,8 @@ public class CodeExecutionService {
             }
         }
 
-        if (jdoodleClientId != null && !jdoodleClientId.trim().isEmpty() && !jdoodleClientId.equals("YOUR_JDOODLE_CLIENT_ID")) {
+        if (jdoodleClientId != null && !jdoodleClientId.trim().isEmpty()
+                && !jdoodleClientId.equals("YOUR_JDOODLE_CLIENT_ID")) {
             return executeJDoodle(wrappedCode, languageId, stdin);
         }
         // JDoodle is the only supported compiler. If JDoodle credentials are missing,
@@ -254,7 +260,8 @@ public class CodeExecutionService {
                 if (timeStr != null && !timeStr.isEmpty()) {
                     time = Double.parseDouble(timeStr);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
             if (time > maxRuntime) {
                 maxRuntime = time;
             }
@@ -327,61 +334,11 @@ public class CodeExecutionService {
         return result;
     }
 
-    private String encode(String str) {
-        if (str == null) return "";
-        return Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private String decode(String base64Str) {
-        if (base64Str == null || base64Str.isEmpty()) return "";
-        try {
-            return new String(Base64.getDecoder().decode(base64Str.trim()), StandardCharsets.UTF_8);
-        } catch (IllegalArgumentException e) {
-            return base64Str;
-        }
-    }
-
-    private JsonNode decodeResponseFields(JsonNode rawNode) {
-        try {
-            com.fasterxml.jackson.databind.node.ObjectNode decoded = objectMapper.createObjectNode();
-
-            if (rawNode.has("stdout")) {
-                decoded.put("stdout", decode(rawNode.path("stdout").asText(null)));
-            } else {
-                decoded.putNull("stdout");
-            }
-
-            if (rawNode.has("stderr")) {
-                decoded.put("stderr", decode(rawNode.path("stderr").asText(null)));
-            } else {
-                decoded.putNull("stderr");
-            }
-
-            if (rawNode.has("compile_output")) {
-                decoded.put("compile_output", decode(rawNode.path("compile_output").asText(null)));
-            } else {
-                decoded.putNull("compile_output");
-            }
-
-            if (rawNode.has("message")) {
-                decoded.put("message", decode(rawNode.path("message").asText(null)));
-            } else {
-                decoded.putNull("message");
-            }
-
-            decoded.set("time", rawNode.path("time"));
-            decoded.set("memory", rawNode.path("memory"));
-            decoded.set("status", rawNode.path("status"));
-
-            return decoded;
-        } catch (Exception e) {
-            return rawNode;
-        }
-    }
-
     private boolean compareOutputs(String actual, String expected) {
-        if (actual == null) actual = "";
-        if (expected == null) expected = "";
+        if (actual == null)
+            actual = "";
+        if (expected == null)
+            expected = "";
 
         String[] actualLines = actual.replace("\r", "").split("\n");
         String[] expectedLines = expected.replace("\r", "").split("\n");
