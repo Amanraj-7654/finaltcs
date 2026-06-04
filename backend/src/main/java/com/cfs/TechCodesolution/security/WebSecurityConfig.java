@@ -94,6 +94,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/ws-info/**").permitAll()
 
+                        // Actuator endpoints (Health Check, etc.)
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // All other requests need a valid JWT
                         .anyRequest().authenticated());
 
