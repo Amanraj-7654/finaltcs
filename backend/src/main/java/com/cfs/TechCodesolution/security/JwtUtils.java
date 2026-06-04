@@ -4,15 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
-
 
 @Component
 public class JwtUtils {
@@ -26,7 +23,7 @@ public class JwtUtils {
 
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);  // ✅ auto-picks correct algorithm
+        return Keys.hmacShaKeyFor(keyBytes); // ✅ auto-picks correct algorithm
     }
 
     public String generateJwtToken(Authentication authentication) {
@@ -42,7 +39,7 @@ public class JwtUtils {
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())  // ✅ use Key object
+                .setSigningKey(getSigningKey()) // ✅ use Key object
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -52,7 +49,7 @@ public class JwtUtils {
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())  // ✅ use Key object
+                    .setSigningKey(getSigningKey()) // ✅ use Key object
                     .build()
                     .parseClaimsJws(authToken);
             return true;
@@ -71,51 +68,48 @@ public class JwtUtils {
     }
 }
 
-
-
-
-
-//@Component
-//public class JwtUtils {
-//    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+// @Component
+// public class JwtUtils {
+// private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 //
-//    @Value("${techcodesolution.app.jwtSecret:techcodesolutionSecretKey}")
-//    private String jwtSecret;
+// @Value("${techcodesolution.app.jwtSecret:techcodesolutionSecretKey}")
+// private String jwtSecret;
 //
-//    @Value("${techcodesolution.app.jwtExpirationMs:86400000}")
-//    private int jwtExpirationMs;
+// @Value("${techcodesolution.app.jwtExpirationMs:86400000}")
+// private int jwtExpirationMs;
 //
-//    public String generateJwtToken(Authentication authentication) {
-//        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+// public String generateJwtToken(Authentication authentication) {
+// UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 //
-//        return Jwts.builder()
-//                .setSubject((userPrincipal.getUsername()))
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-//                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-//                .compact();
-//    }
+// return Jwts.builder()
+// .setSubject((userPrincipal.getUsername()))
+// .setIssuedAt(new Date())
+// .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+// .signWith(SignatureAlgorithm.HS512, jwtSecret)
+// .compact();
+// }
 //
-//    public String getUserNameFromJwtToken(String token) {
-//        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
-//    }
+// public String getUserNameFromJwtToken(String token) {
+// return
+// Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+// }
 //
-//    public boolean validateJwtToken(String authToken) {
-//        try {
-//            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-//            return true;
-//        } catch (SignatureException e) {
-//            logger.error("Invalid JWT signature: {}", e.getMessage());
-//        } catch (MalformedJwtException e) {
-//            logger.error("Invalid JWT token: {}", e.getMessage());
-//        } catch (ExpiredJwtException e) {
-//            logger.error("JWT token is expired: {}", e.getMessage());
-//        } catch (UnsupportedJwtException e) {
-//            logger.error("JWT token is unsupported: {}", e.getMessage());
-//        } catch (IllegalArgumentException e) {
-//            logger.error("JWT claims string is empty: {}", e.getMessage());
-//        }
+// public boolean validateJwtToken(String authToken) {
+// try {
+// Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+// return true;
+// } catch (SignatureException e) {
+// logger.error("Invalid JWT signature: {}", e.getMessage());
+// } catch (MalformedJwtException e) {
+// logger.error("Invalid JWT token: {}", e.getMessage());
+// } catch (ExpiredJwtException e) {
+// logger.error("JWT token is expired: {}", e.getMessage());
+// } catch (UnsupportedJwtException e) {
+// logger.error("JWT token is unsupported: {}", e.getMessage());
+// } catch (IllegalArgumentException e) {
+// logger.error("JWT claims string is empty: {}", e.getMessage());
+// }
 //
-//        return false;
-//    }
-//}
+// return false;
+// }
+// }

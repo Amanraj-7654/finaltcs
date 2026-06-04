@@ -26,7 +26,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +79,7 @@ public class SubmissionControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String mockJson = "{\"stdout\": \"Success\", \"status\": {\"id\": 3, \"description\": \"Accepted\"}}";
-        when(codeExecutionService.execute(any(), any(Integer.class), any()))
+        when(codeExecutionService.execute(any(), anyInt(), any(), nullable(Long.class)))
                 .thenReturn(objectMapper.readTree(mockJson));
 
         Map<String, Object> request = new HashMap<>();
